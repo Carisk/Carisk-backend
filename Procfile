@@ -1,0 +1,1 @@
+web: gunicorn ttok.wsgi --log-file -

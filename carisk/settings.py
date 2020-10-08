@@ -38,9 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-# TTOK apps
-    'node',
-    'users',
+# Carisk apps
+    'car',
 # Libs
     'rest_framework',
     'corsheaders',
@@ -70,7 +69,7 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 ALLOWED_HOSTS = ['*']
 
-ROOT_URLCONF = 'ttok.urls'
+ROOT_URLCONF = 'carisk.urls'
 
 TEMPLATES = [
     {
@@ -88,7 +87,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'ttok.wsgi.application'
+WSGI_APPLICATION = 'carisk.wsgi.application'
 
 
 # Database

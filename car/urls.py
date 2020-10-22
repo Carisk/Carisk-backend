@@ -1,16 +1,14 @@
-from django.urls import path, include
-from rest_framework import routers
-from rest_framework.routers import DefaultRouter
+from django.urls import path
 
 from .viewsets import (
-    CarViewSet
+    CarView
 )
 
-router = DefaultRouter()
-router.register(r'', CarViewSet)
+# router = DefaultRouter()
+# router.register(r'', CarViewSet)
 
 appname = 'cars'
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('predict/', CarView.as_view())
 ]

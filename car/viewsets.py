@@ -1,99 +1,66 @@
-from rest_framework.response import Response
-from rest_framework.decorators import action
-from rest_framework import (
-    permissions, mixins, 
-    filters, generics, status,
-    viewsets, filters,
-)
-from django.db.models import Q
 import random
+from operator import itemgetter
 
-from .models import Car
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework import status
 
-from .serializers import (
-    AccidentRiskSerializer
-)
-
+from .extrapolation import Extrapolation
+from .nn import NeuralNetwork
 
 # Create your views here.
-class CarViewSet(viewsets.ModelViewSet):
-    queryset = Car.objects.all()
-    serializer_class = FullNodeSerializer
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name', 'body')
+class CarView(APIView):
+    """
+    This is the predicion view.
+    It has a single endpoint called POST '/predict/'
+    When a message is sent to it, it's parsed and a 
+    prediction is generated, parsed and returned to user
+    """
 
-    def get_permissions(self):
-        action = self.action
-        if action in ['create', 'vote', 'report', 'update', 'partial_update']:
-            permission_classes = [permissions.IsAuthenticated]
-        elif action in ['destroy']:
-            permission_classes = [IsOwner]
-        elif action in ['retrieve', 'query', 'list', 'search']:
-            permission_classes = [permissions.AllowAny]
-        else:
-            permission_classes = [permissions.IsAdminUser]
-        return [permission() for permission in permission_classes]
+    def post(self, request, *args, **kwargs):
+        data_extrapolation = Extrapolation()
+        neural_network = NeuralNetwork()
 
-    def get_serializer_class(self): 
-        serializer_class = self.serializer_class 
-        if self.request.method in ['PUT', 'PATCH']: 
-            serializer_class = NodeEditSerializer 
-        return serializer_class
+        # Collect basic data
+        data = {
+            'latitude':     request.data['latitude'],
+            'longitude':    request.data['longitude'],
+            'sex':          request.data['sex'],
+            'vehicle_type': request.data['vehicle_type'],
+            'vehicle_age':  validate_integer(request.data['vehicle_age']),
+            'age':          validate_integer(request.data['age']),
+        }
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        nodeData = serializer.data
-        nodeName = nodeData['name']
-        nodeBody = ''
-        if 'body' in nodeData.keys():
-            nodeBody = nodeData['body']
-        node = Node(name=nodeName, body=nodeBody, author=request.user)
-        node.save()
-        node.author.add_contribution(
-            'Created node ' + node.name
+        # Extrapolate remaining data
+        data['climate'] = data_extrapolation.get_climate(
+            request.data['latitude'],
+            request.data['longitude']
         )
-        node.author.add_contribution_points(+1)
-        serializer = self.get_serializer(node)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-    def list(self, request, *args, **kwargs):
-        instance = random.choice(self.get_queryset())
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
+        # Predict
+        predictions = NeuralNetwork.predict(data)
 
-    @action(detail=False, methods=['get'], url_path='search/(?P<search_term>[^/.]+)')
-    def search(self, request, search_term=None):
-        if len(search_term) == 0:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        fullset = self.get_queryset()
-        queryset = fullset.filter(name__startswith=search_term)
-        if queryset.count() < 10:
-            other_queryset = fullset.filter(name__contains=search_term)
-            queryset = queryset.union(other_queryset)
-        if queryset.count() < 10:
-            other_queryset = fullset.filter(name__icontains=search_term)
-            queryset = queryset.union(other_queryset)
-        return Response(QueryNodeSerializer(queryset[:10], many=True).data)
+        # Parse prediction
+        predictions = sorted(predictions, key=itemgetter('result'), reverse=True)
+        most_likely = predictions[0]['title']
 
-    @action(detail=True, methods=['get'])
-    def report(self, request, pk=None):
-        instance = self.get_object()
-        reported = instance.report(request.user)
-        return Response(reported)
-        
-    @action(detail=True, methods=['post'])
-    def vote(self, request, pk=None):
-        node = Node.objects.filter(pk=pk).first()
-        parent = request.data['parent']
-        voteparam = request.data['voteparam']
-        parent = Node.objects.filter(pk=parent).first()
-        return Response(node.vote(parent, request.user, voteparam))
+        # Represents it correctly for frontend use
+        response = {}
+        response['backgroundColor'] = '#aadada'
+        response['showSign'] = False
+        response['showSpinner'] = False
+        response['signUrl'] = ''
+        response['primaryText'] = most_likely
+        response['secondaryText'] = 'Be careful! Be paranoid! Imminent death risk!!!'
 
-    @action(detail=True, methods=['get'])
-    def query(self, request, pk=None):
-        instance = self.get_object()
-        queryset = instance.get_child_nodes()
-        serializer = QueryNodeSerializer(queryset, many=True)
-        return Response(serializer.data)
+        # Response
+        response['most_likely'] = most_likely
+        response['nn_input'] = data
+        return Response(response, status=status.HTTP_200_OK)
+
+def validate_integer(supposed_integer):
+    try:
+        integer = int(supposed_integer)
+    except:
+        return None
+    return integer    

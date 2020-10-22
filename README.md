@@ -52,6 +52,12 @@ source ve/bin/activate
 ```
 python manage.py runserver
 ```
+ 
+or
+
+```
+./runserver.sh
+```
 
 3. Stopping
 

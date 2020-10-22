@@ -1,3 +1,5 @@
+import random
+
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import (
@@ -6,94 +8,22 @@ from rest_framework import (
     viewsets, filters,
 )
 from django.db.models import Q
-import random
+from django.http import Http404
+from rest_framework.views import APIView
+from rest_framework import status
 
-from .models import Car
+# from .models import Car
 
-from .serializers import (
-    AccidentRiskSerializer
-)
+# from .serializers import (
+#     AccidentRiskSerializer
+# )
 
 
 # Create your views here.
-class CarViewSet(viewsets.ModelViewSet):
-    queryset = Car.objects.all()
-    serializer_class = FullNodeSerializer
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name', 'body')
+class CarView(APIView):
+    def post(self, request, *args, **kwargs):
+        data = {
+            'suck': 'my balls'
+        }
+        return Response(data, status=status.HTTP_200_OK)
 
-    def get_permissions(self):
-        action = self.action
-        if action in ['create', 'vote', 'report', 'update', 'partial_update']:
-            permission_classes = [permissions.IsAuthenticated]
-        elif action in ['destroy']:
-            permission_classes = [IsOwner]
-        elif action in ['retrieve', 'query', 'list', 'search']:
-            permission_classes = [permissions.AllowAny]
-        else:
-            permission_classes = [permissions.IsAdminUser]
-        return [permission() for permission in permission_classes]
-
-    def get_serializer_class(self): 
-        serializer_class = self.serializer_class 
-        if self.request.method in ['PUT', 'PATCH']: 
-            serializer_class = NodeEditSerializer 
-        return serializer_class
-
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        nodeData = serializer.data
-        nodeName = nodeData['name']
-        nodeBody = ''
-        if 'body' in nodeData.keys():
-            nodeBody = nodeData['body']
-        node = Node(name=nodeName, body=nodeBody, author=request.user)
-        node.save()
-        node.author.add_contribution(
-            'Created node ' + node.name
-        )
-        node.author.add_contribution_points(+1)
-        serializer = self.get_serializer(node)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
-    def list(self, request, *args, **kwargs):
-        instance = random.choice(self.get_queryset())
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
-
-    @action(detail=False, methods=['get'], url_path='search/(?P<search_term>[^/.]+)')
-    def search(self, request, search_term=None):
-        if len(search_term) == 0:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        fullset = self.get_queryset()
-        queryset = fullset.filter(name__startswith=search_term)
-        if queryset.count() < 10:
-            other_queryset = fullset.filter(name__contains=search_term)
-            queryset = queryset.union(other_queryset)
-        if queryset.count() < 10:
-            other_queryset = fullset.filter(name__icontains=search_term)
-            queryset = queryset.union(other_queryset)
-        return Response(QueryNodeSerializer(queryset[:10], many=True).data)
-
-    @action(detail=True, methods=['get'])
-    def report(self, request, pk=None):
-        instance = self.get_object()
-        reported = instance.report(request.user)
-        return Response(reported)
-        
-    @action(detail=True, methods=['post'])
-    def vote(self, request, pk=None):
-        node = Node.objects.filter(pk=pk).first()
-        parent = request.data['parent']
-        voteparam = request.data['voteparam']
-        parent = Node.objects.filter(pk=parent).first()
-        return Response(node.vote(parent, request.user, voteparam))
-
-    @action(detail=True, methods=['get'])
-    def query(self, request, pk=None):
-        instance = self.get_object()
-        queryset = instance.get_child_nodes()
-        serializer = QueryNodeSerializer(queryset, many=True)
-        return Response(serializer.data)

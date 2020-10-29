@@ -1,4 +1,6 @@
 import requests
+import datetime
+import pytz
 
 class Extrapolation():
     """
@@ -31,13 +33,42 @@ class Extrapolation():
         return climate
 
     def get_day_of_week(self, latitude, longitude):
-        pass
+        unix_time = data['dt'] #stores unixtime given from API
+        timestamp = datetime.datetime.utcfromtimestamp(unix_time) 
+        
+        day_of_week_index = timestamp.weekday() #return index, with 0 being Monday...
+
+        #days in language that match with the dataset
+        all_days = [
+            "segunda-feira",
+            "terça-feira",
+            "quarta-feira",
+            "quinta-feira",
+            "sexta-feira",
+            "sábado",
+            "domingo"
+        ]
+
+        day_of_week = all_days[day_of_week_index]
+
+        return day_of_week
 
     def get_date(self, latitude, longitude):
-        pass
+        unix_time = data['dt'] #stores unixtime given from API
+        timestamp = datetime.datetime.utcfromtimestamp(unix_time) 
+        date = timestamp.strftime('%d/%m/%Y')
+
+        return date
     
     def get_time_from_timezone(self, latitude, longitude):
-        pass
+        unix_time_seconds = data['dt'] #stores unixtime given from API
+        offsets_seconds = data['timezone'] #stores offset valor given from API
+
+        time = unix_time_seconds + offsets_seconds #stores time with current timezone in UnixTime
+        timestamp = datetime.datetime.utcfromtimestamp(time) #readble date
+        hour = timestamp.strftime('%X')
+
+        return hour
 
     def get_geolocation(self, location_name):
         googleurl = 'https://www.google.com.br/maps/search/'

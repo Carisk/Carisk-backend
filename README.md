@@ -39,6 +39,11 @@ source ve/bin/activate
 pip install -r requirements.txt
 ```
 
+4. Download dataset
+```
+./download_dataset.sh
+```
+
 ## How to run?
 
 1. Enter the virtual environment

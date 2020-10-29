@@ -25,10 +25,10 @@ class Extrapolation():
 
         # api data
         data = res.json()
-        print(data)
+        # print(data)
         climate = data['weather'][0]['description']
         
-        print('Climate from API is:', climate)
+        # print('Climate from API is:', climate)
 
         return climate
 

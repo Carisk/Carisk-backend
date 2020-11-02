@@ -3,3 +3,4 @@ ve
 db.sqlite3
 dataset/*
 !*.gitkeep
+*.pyc

@@ -1,17 +1,37 @@
-# import ?
+import pickle 
+import xgboost
 
-class NeuralNetwork():
+class NeuralNetwork:
     """
     This class is used to predict accident risk
     """
+    def __init__(self):
+    
+        self.acidentes_label = [
+            'Dangerous driving area',
+            'Dangerous driving area',
+            'Animals on the road',
+            'People on the road',
+            'Dangerous road',
+            'Dangerous driving area',
+            'Inattentive drivers',
+            'Inattentive drivers']
 
-    def load_pickle(path):
-        pass
+    def load_pickle(filename):
+        model = pickle.load(open('../model/'+ filename, "rb"))
+        return model
 
     def predict(data):
-        return [
-            { 'title': 'morte subita por queda de avião monomotor', 'result': 0.1 },
-            { 'title': 'atirador de elite',                         'result': 0.5 },
-            { 'title': 'explosão',                                  'result': 0.3 },
-            { 'title': 'alienigenas',                               'result': 0.9 },
-        ]
+
+        filename = 'xboost_model.sav'
+
+        model = load_pickle(filename)
+
+        predictions = model.predict(data)
+
+        results = []
+
+        for predict in predictions:
+            results.append({ 'title': self.acidentes_label[pred], 'result': 0.1 })
+            
+        return results

@@ -45,13 +45,7 @@ class CarView(APIView):
         most_likely = predictions[0]['title']
 
         # Represents it correctly for frontend use
-        response = {}
-        response['backgroundColor'] = '#aadada'
-        response['showSign'] = False
-        response['showSpinner'] = False
-        response['signUrl'] = ''
-        response['primaryText'] = most_likely
-        response['secondaryText'] = 'Be careful! Be paranoid! Imminent death risk!!!'
+        response = manage_predictions(predictions)
 
         # Response
         response['most_likely'] = most_likely
@@ -64,3 +58,54 @@ def validate_integer(supposed_integer):
     except:
         return None
     return integer    
+
+def manage_predictions(predictions):
+    # Urls for send response
+    urls_sign = {
+        'Animals on the road':          '',
+        'People on the road':           '',
+        'Dangerous driving area':       '',
+        'Dangerous road':               '',
+        'Inattentive drivers':          '',
+        'Dangerous drivers':            '',
+        'Dangerous climate conditions': ''
+    }
+    default_sign_url = ''
+    
+    # Choosing best prediction
+    best_prediction = predictions[0]
+    for pred in predictions:
+        if pred['result'] > best_prediction['result']:
+            best_prediction['result'] = pred['result']
+    
+    # Generating response
+    if best_prediction['result'] >= 0.3:
+        if best_prediction['result'] < 0.7:
+            background_color = '#F4ECCF'
+        else:
+            background_color = '#F4CFCF'
+        show_sign = True
+        show_spinner = False
+        primary_text = best_prediction['title']
+        sign_url = urls_sign.get(best_prediction['title'], default_sign_url)
+        secondary_text = 'Pay atention, the worst risk is ' + best_prediction['title']
+    else:
+        background_color = '#E3EFF5'
+        show_sign = False
+        show_spinner = True
+        sign_url = ''
+        primary_text = 'No predictions'
+        secondary_text = 'There are few risks, but be careful yet'
+
+    response = {
+        'backgroundColor':  background_color,
+        'showSign' :        show_sign,
+        'showSpinner' :     show_spinner,
+        'signUrl' :         sign_url,
+        'primaryText' :     primary_text,
+        'secondaryText' :   secondary_text,
+        'most_likely' :     '',
+        'nn_input' :        '',
+    }
+
+    return response

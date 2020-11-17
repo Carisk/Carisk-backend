@@ -1,6 +1,7 @@
 import requests
 import datetime
 import pytz
+from geopy.geocoders import Nominatim
 
 class Extrapolation():
     """
@@ -12,27 +13,60 @@ class Extrapolation():
     def __init__(self):
         pass
 
+
     def get_climate(self, latitude, longitude):
-        # increase coordinate precision
+            # increase coordinate precision
         res = requests.get('https://ipinfo.io/')
         data = res.json()
         location = data['loc'].split(',')
-        language = 'pt'
-
         # connect to climate api
-        url = 'http://api.openweathermap.org/data/2.5/weather?lat={}&lon={}&lang={}&appid=0700d5b772b06c3fc81ae8c2c0773c9c'.format(latitude, longitude, language)
+        url = 'http://api.openweathermap.org/data/2.5/weather?lat={}&lon={}&appid=0700d5b772b06c3fc81ae8c2c0773c9c'.format(latitude, longitude)
         res = requests.get(url)
-
         # api data
         data = res.json()
-        # print(data)
         climate = data['weather'][0]['description']
         
         # print('Climate from API is:', climate)
 
-        return climate
+        climate = data['weather'][0]['main']
+        #Dict to match with current dataset
+        climate_updated = {'Thunderstorm': 'Chuvoso',
+                    'Drizzle': 'Chuvoso',
+                    'Rain': 'Chuvoso',
+                    'Snow': 'Neve',
+                    'Atmosphere': 'Nevoeiro',
+                    'Clear': 'Sol',
+                    'Clouds': 'Nublado'}
+
+
+        return climate_updated[climate]
+    
+    def get_city(self, latitude, longitude):
+        # increase coordinate precision
+        res = requests.get('https://ipinfo.io/')
+        data = res.json()
+        location = data['loc'].split(',')
+        # connect to climate api
+        url = 'http://api.openweathermap.org/data/2.5/weather?lat={}&lon={}&appid=0700d5b772b06c3fc81ae8c2c0773c9c'.format(latitude, longitude)
+        res = requests.get(url)
+        # api data
+        data = res.json()
+
+        city = data['name']
+        return city
 
     def get_day_of_week(self, latitude, longitude):
+        
+        # increase coordinate precision
+        res = requests.get('https://ipinfo.io/')
+        data = res.json()
+        location = data['loc'].split(',')
+        # connect to climate api
+        url = 'http://api.openweathermap.org/data/2.5/weather?lat={}&lon={}&appid=0700d5b772b06c3fc81ae8c2c0773c9c'.format(latitude, longitude)
+        res = requests.get(url)
+        # api data
+        data = res.json()
+
         unix_time = data['dt'] #stores unixtime given from API
         timestamp = datetime.datetime.utcfromtimestamp(unix_time) 
         
@@ -40,20 +74,29 @@ class Extrapolation():
 
         #days in language that match with the dataset
         all_days = [
-            "segunda-feira",
-            "terça-feira",
-            "quarta-feira",
-            "quinta-feira",
-            "sexta-feira",
-            "sábado",
-            "domingo"
+            "SEG",
+            "TER",
+            "QUA",
+            "QUI",
+            "SEX",
+            "SAB",
+            "DOM"
         ]
 
         day_of_week = all_days[day_of_week_index]
 
         return day_of_week
 
-    def get_date(self, latitude, longitude):
+    def get_date(self, latitude, longitude):        
+                # increase coordinate precision
+        res = requests.get('https://ipinfo.io/')
+        data = res.json()
+        location = data['loc'].split(',')
+        # connect to climate api
+        url = 'http://api.openweathermap.org/data/2.5/weather?lat={}&lon={}&appid=0700d5b772b06c3fc81ae8c2c0773c9c'.format(latitude, longitude)
+        res = requests.get(url)
+        # api data
+        data = res.json()
         unix_time = data['dt'] #stores unixtime given from API
         timestamp = datetime.datetime.utcfromtimestamp(unix_time) 
         date = timestamp.strftime('%d/%m/%Y')
@@ -61,12 +104,22 @@ class Extrapolation():
         return date
     
     def get_time_from_timezone(self, latitude, longitude):
+                # increase coordinate precision
+        res = requests.get('https://ipinfo.io/')
+        data = res.json()
+        location = data['loc'].split(',')
+        # connect to climate api
+        url = 'http://api.openweathermap.org/data/2.5/weather?lat={}&lon={}&appid=0700d5b772b06c3fc81ae8c2c0773c9c'.format(latitude, longitude)
+        res = requests.get(url)
+        # api data
+        data = res.json()
+        
         unix_time_seconds = data['dt'] #stores unixtime given from API
         offsets_seconds = data['timezone'] #stores offset valor given from API
 
         time = unix_time_seconds + offsets_seconds #stores time with current timezone in UnixTime
         timestamp = datetime.datetime.utcfromtimestamp(time) #readble date
-        hour = timestamp.strftime('%X')
+        hour = timestamp.strftime('%H:%M')
 
         return hour
 

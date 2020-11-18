@@ -15,6 +15,7 @@ class NeuralNetwork():
         date = extrapolation.get_date(-23.46052014,-46.48772478)
         time_timezone = extrapolation.get_time_from_timezone(-23.46052014,-46.48772478)
         city = extrapolation.get_city(-23.46052014,-46.48772478)
+        state = extrapolation.get_state(-23.46052014,-46.48772478)
         
         return [
            # { 'title': 'morte subita por queda de avião monomotor', 'result': 0.1 },
@@ -22,6 +23,7 @@ class NeuralNetwork():
            # { 'title': 'explosão',                                  'result': 0.3 },
            # { 'title': 'alienigenas',                               'result': 0.9 },
            weather,
+           state,
            city,
            day_of_week,
            date,

@@ -13,9 +13,8 @@ class Extrapolation():
     def __init__(self):
         pass
 
-
-    def get_climate(self, latitude, longitude):
-            # increase coordinate precision
+    def get_api(self, latitude, longitude):
+        # increase coordinate precision
         res = requests.get('https://ipinfo.io/')
         data = res.json()
         location = data['loc'].split(',')
@@ -24,6 +23,11 @@ class Extrapolation():
         res = requests.get(url)
         # api data
         data = res.json()
+        return data
+
+    def get_climate(self, latitude, longitude):
+           
+        data = self.get_api(latitude, longitude) #data from API
         climate = data['weather'][0]['description']
         
         # print('Climate from API is:', climate)
@@ -39,33 +43,25 @@ class Extrapolation():
                     'Clouds': 'Nublado'}
 
 
-        return climate_updated[climate]
+        return climate_updated[climate] 
+
+    def get_state(self, latitude, longitude):
+        geolocator = Nominatim(user_agent="Carisk")
+        coord = latitude, longitude
+        location = geolocator.reverse(coord)
+        address = location.raw['address']
+        state = address.get('state', '')
+    
+        return state
     
     def get_city(self, latitude, longitude):
-        # increase coordinate precision
-        res = requests.get('https://ipinfo.io/')
-        data = res.json()
-        location = data['loc'].split(',')
-        # connect to climate api
-        url = 'http://api.openweathermap.org/data/2.5/weather?lat={}&lon={}&appid=0700d5b772b06c3fc81ae8c2c0773c9c'.format(latitude, longitude)
-        res = requests.get(url)
-        # api data
-        data = res.json()
-
-        city = data['name']
+        data = self.get_api(latitude, longitude) #data from API
+        city = data['name'] #storing city name
         return city
 
     def get_day_of_week(self, latitude, longitude):
         
-        # increase coordinate precision
-        res = requests.get('https://ipinfo.io/')
-        data = res.json()
-        location = data['loc'].split(',')
-        # connect to climate api
-        url = 'http://api.openweathermap.org/data/2.5/weather?lat={}&lon={}&appid=0700d5b772b06c3fc81ae8c2c0773c9c'.format(latitude, longitude)
-        res = requests.get(url)
-        # api data
-        data = res.json()
+        data = self.get_api(latitude, longitude) #data from API
 
         unix_time = data['dt'] #stores unixtime given from API
         timestamp = datetime.datetime.utcfromtimestamp(unix_time) 
@@ -88,31 +84,18 @@ class Extrapolation():
         return day_of_week
 
     def get_date(self, latitude, longitude):        
-                # increase coordinate precision
-        res = requests.get('https://ipinfo.io/')
-        data = res.json()
-        location = data['loc'].split(',')
-        # connect to climate api
-        url = 'http://api.openweathermap.org/data/2.5/weather?lat={}&lon={}&appid=0700d5b772b06c3fc81ae8c2c0773c9c'.format(latitude, longitude)
-        res = requests.get(url)
-        # api data
-        data = res.json()
+        
+        data = self.get_api(latitude, longitude) #data from API
+        
         unix_time = data['dt'] #stores unixtime given from API
         timestamp = datetime.datetime.utcfromtimestamp(unix_time) 
-        date = timestamp.strftime('%d/%m/%Y')
+        date = timestamp.strftime('%d/%m/%Y') #convert to readble Date, according to Dataset format
 
         return date
     
     def get_time_from_timezone(self, latitude, longitude):
-                # increase coordinate precision
-        res = requests.get('https://ipinfo.io/')
-        data = res.json()
-        location = data['loc'].split(',')
-        # connect to climate api
-        url = 'http://api.openweathermap.org/data/2.5/weather?lat={}&lon={}&appid=0700d5b772b06c3fc81ae8c2c0773c9c'.format(latitude, longitude)
-        res = requests.get(url)
-        # api data
-        data = res.json()
+        
+        data = self.get_api(latitude, longitude) #data from API
         
         unix_time_seconds = data['dt'] #stores unixtime given from API
         offsets_seconds = data['timezone'] #stores offset valor given from API

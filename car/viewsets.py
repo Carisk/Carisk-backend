@@ -64,11 +64,11 @@ def manage_predictions(predictions):
     urls_sign = {
         'Animals on the road':          'https://github.com/Carisk/Carisk-backend/blob/feature/manage-prediction/images/animals_on_road.png',
         'People on the road':           'https://github.com/Carisk/Carisk-backend/blob/feature/manage-prediction/images/people_on_road.png',
-        'Dangerous driving area':       'https://imagepng.org/wp-content/uploads/2017/08/placa-de-pare.png',
-        'Dangerous road':               'https://imagepng.org/wp-content/uploads/2017/08/placa-de-pare.png',
-        'Inattentive drivers':          'https://imagepng.org/wp-content/uploads/2017/08/placa-de-pare.png',
-        'Dangerous drivers':            'https://imagepng.org/wp-content/uploads/2017/08/placa-de-pare.png',
-        'Dangerous climate conditions': 'https://imagepng.org/wp-content/uploads/2017/08/placa-de-pare.png'
+        'Dangerous driving area':       'https://imagepng.org/wp-content/uploads/2018/08/alerta.png',
+        'Dangerous road':               'https://imagepng.org/wp-content/uploads/2018/08/alerta.png',
+        'Inattentive drivers':          'https://imagepng.org/wp-content/uploads/2018/08/alerta.png',
+        'Dangerous drivers':            'https://imagepng.org/wp-content/uploads/2018/08/alerta.png',
+        'Dangerous climate conditions': 'https://imagepng.org/wp-content/uploads/2018/08/alerta.png'
     }
     default_sign_url = 'https://imagepng.org/wp-content/uploads/2017/08/placa-de-pare.png'
     

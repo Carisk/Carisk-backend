@@ -65,7 +65,7 @@ def manage_predictions(predictions):
         'Animals on the road':          'https://github.com/Carisk/Carisk-backend/blob/feature/manage-prediction/images/animals_on_road.png',
         'People on the road':           'https://github.com/Carisk/Carisk-backend/blob/feature/manage-prediction/images/people_on_road.png',
         'Dangerous driving area':       'https://imagepng.org/wp-content/uploads/2018/08/alerta.png',
-        'Dangerous road':               'https://imagepng.org/wp-content/uploads/2018/08/alerta.png',
+        'Dangerous road':               'https://isinaliza.vteximg.com.br/arquivos/ids/169750-1000-1000/3597-placa-pista-escorregadia-a-28-aluminio-refletivo-acm-100x100cm-1.jpg?v=636800685747170000',
         'Inattentive drivers':          'https://imagepng.org/wp-content/uploads/2018/08/alerta.png',
         'Dangerous drivers':            'https://imagepng.org/wp-content/uploads/2018/08/alerta.png',
         'Dangerous climate conditions': 'https://imagepng.org/wp-content/uploads/2018/08/alerta.png'

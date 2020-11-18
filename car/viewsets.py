@@ -60,17 +60,17 @@ def validate_integer(supposed_integer):
     return integer    
 
 def manage_predictions(predictions):
-    # Urls for send response
+    # Urls of signs used
     urls_sign = {
-        'Animals on the road':          '',
-        'People on the road':           '',
-        'Dangerous driving area':       '',
-        'Dangerous road':               '',
-        'Inattentive drivers':          '',
-        'Dangerous drivers':            '',
-        'Dangerous climate conditions': ''
+        'Animals on the road':          'https://github.com/Carisk/Carisk-backend/blob/feature/manage-prediction/images/animals_on_road.png',
+        'People on the road':           'https://github.com/Carisk/Carisk-backend/blob/feature/manage-prediction/images/people_on_road.png',
+        'Dangerous driving area':       'https://imagepng.org/wp-content/uploads/2017/08/placa-de-pare.png',
+        'Dangerous road':               'https://imagepng.org/wp-content/uploads/2017/08/placa-de-pare.png',
+        'Inattentive drivers':          'https://imagepng.org/wp-content/uploads/2017/08/placa-de-pare.png',
+        'Dangerous drivers':            'https://imagepng.org/wp-content/uploads/2017/08/placa-de-pare.png',
+        'Dangerous climate conditions': 'https://imagepng.org/wp-content/uploads/2017/08/placa-de-pare.png'
     }
-    default_sign_url = ''
+    default_sign_url = 'https://imagepng.org/wp-content/uploads/2017/08/placa-de-pare.png'
     
     # Choosing best prediction
     best_prediction = predictions[0]
@@ -93,7 +93,7 @@ def manage_predictions(predictions):
         background_color = '#E3EFF5'
         show_sign = False
         show_spinner = True
-        sign_url = ''
+        sign_url = default_sign_url
         primary_text = 'No predictions'
         secondary_text = 'There are few risks, but be careful yet'
 

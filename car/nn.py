@@ -3,6 +3,9 @@ import datetime
 
 import pickle 
 import xgboost
+from .extrapolation import Extrapolation
+import numpy as np
+
 from fastai import *
 from fastai.tabular.all import *
 import pandas as pd
@@ -13,35 +16,78 @@ class NeuralNetwork:
     This class is used to predict accident risk
     """
     def __init__(self):
-    
-        self.acidentes_label = [
-            'Dangerous driving area',
-            'Dangerous driving area',
-            'Animals on the road',
-            'People on the road',
-            'Dangerous road',
-            'Dangerous driving area',
-            'Inattentive drivers',
-            'Inattentive drivers']
+        self.model_name = 'xboost_model.sav' 
+        self.encoder_name = 'label_encoder.sav'
+        self.sex_label = {
+            "Male": "Masculino",
+            "Female": "Feminino"
+        }
+     
+    def load_model(self):
 
-    def load_pickle(filename):
-        model = pickle.load(open('../model/'+ filename, "rb"))
+        model = pickle.load(open('model/'+ self.model_name, "rb"))
+
         return model
 
-    def predict(data):
+    def load_encoder(self):
 
-        filename = 'xboost_model.sav'
+        encoder = pickle.load(open('model/'+ self.encoder_name, "rb"))
 
-        model = load_pickle(filename)
+        return encoder
 
-        predictions = model.predict(data)
+    def date_to_second(self,date, time):
+        if date == 'null':
+            return 'null'
+        if time == 'null':
+            a = date
+            b = '01/01/' + date[-4:]
+            f = '%d/%m/%Y'
+            value = (datetime.datetime.strptime(a, f) - datetime.datetime.strptime(b, f)).total_seconds()
+        else :
+            a = date + ' ' + time
+            b = '01/01/' + date[-4:] + ' 00:00'
+            f = '%d/%m/%Y %H:%M'
+            value = (datetime.datetime.strptime(a, f) - datetime.datetime.strptime(b, f)).total_seconds()
+        return int(value/60)
 
-        results = []
+    def predict(self, data):
 
-        for predict in predictions:
-            results.append({ 'title': self.acidentes_label[pred], 'result': 0.1 })
+        encoder = self.load_encoder()
+
+        model = self.load_model()
+
+        extr = Extrapolation()
+
+        weather, day_of_week, date, hour = extr.get_weather_data(data['latitude'], data['longitude'])
+
+        if(data['sex'] == "Masculino" or data['sex'] == "Feminino"):
+            victim_gender = [data['sex']] 
+        else:
+            victim_gender = self.sex_label[data['sex']]
+
+        if day_of_week == 'SAB':
+            day_of_week = 'SÁB'
+
+        victim_gender = encoder['Victim gender'].transform([victim_gender])[0]
+        weekday = encoder['Weekday'].transform([day_of_week])[0]
+        weather = encoder['Weather'].transform([weather])[0]
+
+        h, m = hour.split(':')
+        time_of_day  = int(datetime.timedelta(hours=int(h),minutes=int(m)).total_seconds())
+
+        time_of_year = str(self.date_to_second(date, hour))
+
+        inputs = np.array([time_of_year, time_of_day, weekday, weather, data['latitude'], data['longitude'], data['vehicle_age'], data['age'], victim_gender]).reshape((1,-1))
+
+        predict = model.predict(inputs)
+        probs = model.predict_proba(inputs)
+
+        result = np.average(probs)
+
+        title = encoder['Accident cause'].inverse_transform([predict])[0]
+        
             
-        return results
+        return [{ 'title': title , 'result': result }]
 
 class RenatoFastAiANNModel:
 

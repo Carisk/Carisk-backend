@@ -38,7 +38,7 @@ class CarView(APIView):
         )
 
         # Predict
-        predictions = NeuralNetwork.predict(data)
+        predictions = neural_network.predict(data)
 
         # Parse prediction
         predictions = sorted(predictions, key=itemgetter('result'), reverse=True)

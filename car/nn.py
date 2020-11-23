@@ -82,7 +82,8 @@ class NeuralNetwork:
         predict = model.predict(inputs)
         probs = model.predict_proba(inputs)
 
-        result = np.average(probs)
+        result = probs[0][predict]
+        print(result)
 
         title = encoder['Accident cause'].inverse_transform([predict])[0]
         

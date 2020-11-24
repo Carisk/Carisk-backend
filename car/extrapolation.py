@@ -10,7 +10,23 @@ class Extrapolation():
     """
 
     def __init__(self):
-        pass
+
+        self.climate_label = {'Thunderstorm': 'Chuvoso',
+                                'Drizzle': 'Chuvoso',
+                                'Rain': 'Chuvoso',
+                                'Snow': 'Neve',
+                                'Atmosphere': 'Nevoeiro',
+                                'Clear': 'Sol',
+                                'Clouds': 'Nublado'}
+        self.day_label = [
+                        "SEG",
+                        "TER",
+                        "QUA",
+                        "QUI",
+                        "SEX",
+                        "SAB",
+                        "DOM"
+                    ]
 
     def get_climate(self, latitude, longitude):
         # increase coordinate precision
@@ -82,3 +98,33 @@ class Extrapolation():
             'latitude': end[0],
             'longitude': end[1]
         }
+
+    def get_weather_data(self, latitude, longitude):
+
+        url = 'http://api.openweathermap.org/data/2.5/weather?lat={}&lon={}&appid=0700d5b772b06c3fc81ae8c2c0773c9c'.format(latitude, longitude)
+        res = requests.get(url)
+        # api data
+        data = res.json()
+        climate = data['weather'][0]['description']
+        
+        # print('Climate from API is:', climate)
+
+        climate = data['weather'][0]['main']
+        weather = self.climate_label[climate]
+
+        unix_time = data['dt'] #stores unixtime given from API
+        timestamp = datetime.datetime.utcfromtimestamp(unix_time) 
+        
+        day_of_week_index = timestamp.weekday() #return index, with 0 being Monday...
+        day_of_week = self.day_label[day_of_week_index]
+
+        date = timestamp.strftime('%d/%m/%Y')
+
+        offsets_seconds = data['timezone'] #stores offset valor given from API
+        time = unix_time + offsets_seconds #stores time with current timezone in UnixTime
+        timestamp = datetime.datetime.utcfromtimestamp(time) #readble date
+        hour = timestamp.strftime('%H:%M')
+
+
+        return weather, day_of_week, date, hour
+

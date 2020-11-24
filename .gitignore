@@ -1,5 +1,5 @@
 ve
 .vscode
 db.sqlite3
-dataset/*
 !*.gitkeep
+*.pyc
